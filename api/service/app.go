@@ -61,10 +61,6 @@ func NewApp(options AppOptions) (*App, error) {
 		Type: advertising.AdvertisementTypePeripheral,
 	}
 
-	if app.Options.AgentCaps == "" {
-		app.Options.AgentCaps = agent.CapKeyboardDisplay
-	}
-
 	appCounter++
 
 	return app, app.init()
@@ -195,9 +191,11 @@ func (app *App) Run() (err error) {
 		return err
 	}
 
-	err = app.ExposeAgent(app.Options.AgentCaps, app.Options.AgentSetAsDefault)
-	if err != nil {
-		return fmt.Errorf("ExposeAgent: %s", err)
+	if app.Options.AgentCaps != "" {
+		err = app.ExposeAgent(app.Options.AgentCaps, app.Options.AgentSetAsDefault)
+		if err != nil {
+			return fmt.Errorf("ExposeAgent: %s", err)
+		}
 	}
 
 	gm, err := gatt.NewGattManager1FromAdapterID(app.adapterID)
