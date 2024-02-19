@@ -1,13 +1,27 @@
 package service_example
 
 import (
+	"strings"
 	"time"
 
+	"github.com/godbus/dbus/v5"
 	"github.com/muka/go-bluetooth/api/service"
 	"github.com/muka/go-bluetooth/bluez/profile/agent"
 	"github.com/muka/go-bluetooth/bluez/profile/gatt"
 	log "github.com/sirupsen/logrus"
 )
+
+var writtenValue []byte
+
+func extractMACAddressFromOptions(options map[string]interface{}) string {
+	deviceInfo := string(options["device"].(dbus.ObjectPath))
+	parts := strings.Split(deviceInfo, "/")
+	lastPart := parts[len(parts)-1]
+	macParts := strings.Split(lastPart, "_")
+	macAddress := strings.Join(macParts[1:], ":")
+
+	return macAddress
+}
 
 func serve(adapterID string) error {
 
@@ -55,14 +69,14 @@ func serve(adapterID string) error {
 		gatt.FlagCharacteristicWrite,
 	}
 
-	char1.OnRead(service.CharReadCallback(func(c *service.Char, options map[string]interface{}) ([]byte, error) {
-		log.Warnf("GOT READ REQUEST")
-		return []byte{42}, nil
+	char1.OnWrite(service.CharWriteCallback(func(c *service.Char, value []byte, options map[string]interface{}) ([]byte, error) {
+		log.Warnf("GOT WRITE REQUEST from %s", extractMACAddressFromOptions(options))
+		return value, nil
 	}))
 
-	char1.OnWrite(service.CharWriteCallback(func(c *service.Char, value []byte) ([]byte, error) {
-		log.Warnf("GOT WRITE REQUEST")
-		return value, nil
+	char1.OnRead(service.CharReadCallback(func(c *service.Char, options map[string]interface{}) ([]byte, error) {
+		log.Warnf("GOT READ REQUEST from %s", extractMACAddressFromOptions(options))
+		return writtenValue, nil
 	}))
 
 	err = service1.AddChar(char1)
@@ -81,11 +95,11 @@ func serve(adapterID string) error {
 	}
 
 	descr1.OnRead(service.DescrReadCallback(func(c *service.Descr, options map[string]interface{}) ([]byte, error) {
-		log.Warnf("GOT READ REQUEST")
+		log.Warnf("GOT READ REQUEST from %s", extractMACAddressFromOptions(options))
 		return []byte{42}, nil
 	}))
-	descr1.OnWrite(service.DescrWriteCallback(func(d *service.Descr, value []byte) ([]byte, error) {
-		log.Warnf("GOT WRITE REQUEST")
+	descr1.OnWrite(service.DescrWriteCallback(func(d *service.Descr, value []byte, options map[string]interface{}) ([]byte, error) {
+		log.Warnf("GOT WRITE REQUEST from %s", extractMACAddressFromOptions(options))
 		return value, nil
 	}))
 

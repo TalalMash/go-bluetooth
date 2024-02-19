@@ -8,7 +8,7 @@ import (
 )
 
 type DescrReadCallback func(c *Descr, options map[string]interface{}) ([]byte, error)
-type DescrWriteCallback func(c *Descr, value []byte) ([]byte, error)
+type DescrWriteCallback func(c *Descr, value []byte, options map[string]interface{}) ([]byte, error)
 
 type Descr struct {
 	UUID string

@@ -32,7 +32,7 @@ func createTestApp(t *testing.T) *App {
 		OnRead(CharReadCallback(func(c *Char, options map[string]interface{}) ([]byte, error) {
 			return nil, nil
 		})).
-		OnWrite(CharWriteCallback(func(c *Char, value []byte) ([]byte, error) {
+		OnWrite(CharWriteCallback(func(c *Char, value []byte, options map[string]interface{}) ([]byte, error) {
 			return nil, nil
 		}))
 

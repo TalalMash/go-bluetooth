@@ -11,7 +11,7 @@ import (
 )
 
 type CharReadCallback func(c *Char, options map[string]interface{}) ([]byte, error)
-type CharWriteCallback func(c *Char, value []byte) ([]byte, error)
+type CharWriteCallback func(c *Char, value []byte, options map[string]interface{}) ([]byte, error)
 type CharNotifyCallback func(c *Char, notify bool) error
 
 type Char struct {
